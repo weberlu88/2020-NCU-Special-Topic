@@ -20,8 +20,11 @@ users = [
 insert_query = "INSERT INTO users VALUES (NULL, ?, ?)"
 cursor.executemany(insert_query, users)
 
+# tbl items
 create_table = "CREATE TABLE IF NOT EXISTS items (name text PRIMARY KEY, price real)"
 cursor.execute(create_table)
+
+cursor.execute("INSERT INTO items VALUES ('iPhone SE', 20.99)")
 
 connection.commit()
 
