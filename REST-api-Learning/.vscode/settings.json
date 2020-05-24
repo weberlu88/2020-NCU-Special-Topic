@@ -1,0 +1,11 @@
+{
+    "python.pythonPath": "C:\\ProgramData\\Anaconda3\\python.exe",
+    "sqltools.connections": [
+        {
+            "database": "${workspaceFolder}\\Section5 SQLite/data.db",
+            "dialect": "SQLite",
+            "name": "hello"
+        }
+    ],
+    "sqltools.useNodeRuntime": true
+}
