@@ -27,15 +27,39 @@ class Item(Resource):
             return {'item': {'name': row[0], 'price': row[1]}}
     
     @classmethod
-    def create_item(cls, item):
+    def insert(cls, item):
         connection = sqlite3.connect('data.db')
         cursor = connection.cursor()
 
         query = "INSERT INTO items VALUES (?, ?)"
-        result = cursor.execute(query, (item['name'], item['price']))
+        cursor.execute(query, (item['name'], item['price']))
         connection.commit()
         connection.close()
         return 
+    
+    @classmethod
+    def update(cls, item):
+        connection = sqlite3.connect('data.db')
+        cursor = connection.cursor()
+
+        query = "UPDATE items SET price=? WHERE name=?"
+        cursor.execute(query, (item['price'], item['name']))
+
+        connection.commit()
+        connection.close()
+        return
+
+    @classmethod
+    def delete_by_name(cls, name):
+        connection = sqlite3.connect('data.db')
+        cursor = connection.cursor()
+
+        query = "DELETE from items WHERE name=?"
+        cursor.execute(query, (name,))
+
+        connection.commit()
+        connection.close()
+        return
 
     @jwt_required()
     def get(self, name):
@@ -46,30 +70,42 @@ class Item(Resource):
         
     @jwt_required()
     def post(self, name):
+        '''Create a new item.'''
         if self.find_by_name(name):
             return {'Message': "An item with name '{}' already exists.".format(name)}, 400
             
         # filter 'price' go through only . Ignore others.
         data = Item.parser.parse_args() 
         item = {'name': name, 'price': data['price']}
-        self.create_item(item)
+        try:
+            self.insert(item)
+        except:
+            return {"message": "An error occurred inserting the item."}, 500 # internal server error
         return item, 201
 
     @jwt_required()
     def put(self, name):
-        data = request.get_json()
-        item = next(filter(lambda x: x['name'] == name, items), None)
+        data = Item.parser.parse_args()
+        item = self.find_by_name(name)
+        updated_item = {'name': name, 'price': data['price']}
         if item is None:
-            item = {'name': name, 'price': data['price']}
-            items.append(item)
+            try:
+                self.insert(updated_item)
+            except:
+                return {"message": "An error occurred inserting the item."}, 500
         else:
-            item.update(data)
-        return item
+            try:
+                self.update(updated_item)
+            except:
+                return {"message": "An error occurred updating the item."}, 500
+        return updated_item
 
     @jwt_required()
     def delete(self, name):
-        global items
-        items = list(filter(lambda x: x['name'] != name, items))
+        try:
+            self.delete_by_name(name)
+        except:
+            return {"message": "An error occurred deleting the item."}, 500
         return {'message': 'Item deleted'}
 
 # Resource 2
