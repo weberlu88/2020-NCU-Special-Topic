@@ -103,12 +103,36 @@ class Item(Resource):
     @jwt_required()
     def delete(self, name):
         try:
-            self.delete_by_name(name)
+            item = self.find_by_name(name)
+            if item:
+                self.delete_by_name(name)
+            else:
+                return {'message': 'Item not found'}
         except:
             return {"message": "An error occurred deleting the item."}, 500
         return {'message': 'Item deleted'}
 
 # Resource 2
 class ItemList(Resource):
+    TABLE_NAME = 'items'
+
+    @classmethod
+    def get_all(cls):
+        connection = sqlite3.connect('data.db')
+        cursor = connection.cursor()
+
+        query = "SELECT * FROM {table}".format(table=cls.TABLE_NAME)
+        result = cursor.execute(query)
+        items = []
+        for row in result:
+            items.append({'name': row[0], 'price': row[1]})
+        connection.close()
+
+        return items
+
     def get(self):
+        try:
+            items = ItemList.get_all()
+        except:
+            return {"message": "An error occurred getting all items."}, 500 # internal server error
         return {'items': items}
