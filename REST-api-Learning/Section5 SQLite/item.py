@@ -6,7 +6,7 @@ from flask_jwt import jwt_required
 class Item(Resource):
 
     # No self.parser >> parser is belongs to Class ITSELF.
-    parser = reqparse.RequestParser()
+	parser = reqparse.RequestParser()
     parser.add_argument('price',
         type=float,
         required=True,

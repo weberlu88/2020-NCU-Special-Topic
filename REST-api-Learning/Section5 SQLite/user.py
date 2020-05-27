@@ -16,7 +16,7 @@ class User:
         query = "SELECT * FROM users WHERE username = ?"
         result = cursor.execute(query, (username,)) # 是 tuple 所以加','
         row = result.fetchone()
-        if row:
+        if row: 
             # user = cls(row[0], row[1], row[2]) # same as
             user = cls(*row)
         else:
